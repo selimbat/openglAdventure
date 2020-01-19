@@ -1,0 +1,6 @@
+﻿  main.cpp
+LINK : warning LNK4098: conflit entre la bibliothèque par défaut 'MSVCRT' et les autres bibliothèques ; utilisez /NODEFAULTLIB:library
+main.obj : error LNK2019: symbole externe non résolu __imp_glewInit référencé dans la fonction main
+main.obj : error LNK2001: symbole externe non résolu __imp_glewExperimental
+D:\dev\Projects\OpenGLCourse\..\..\External Libs\GLEW\lib\Release\Win32\glew32.lib : warning LNK4272: type d'ordinateur bibliothèque 'x86' en conflit avec le type d'ordinateur cible 'x64'
+D:\dev\Projects\OpenGLCourse\x64\Debug\OpenGLCourse.exe : fatal error LNK1120: 2 externes non résolus
