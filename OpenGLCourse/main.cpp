@@ -17,7 +17,7 @@ layout (location = 0) in vec3 pos;						\n\
 														\n\
 void main()												\n\
 {														\n\
-	gl_Position = vec4(0.4 * pos.xy, pos.z , 1.0);		\n\
+	gl_Position = vec4(0.8 * pos.xy, pos.z , 1.0);		\n\
 }";
 
 // Fragment shader
@@ -71,7 +71,7 @@ void AddShader(GLuint program, const char* shaderCode, GLenum shaderType)
 	GLint result = 0;
 	GLchar eLog[1024] = { 0 };
 
-	glGetProgramiv(shader, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 	if (!result)
 	{
 		glGetShaderInfoLog(shader, sizeof(eLog), NULL, eLog);
