@@ -1,13 +1,24 @@
 #include <stdio.h>
 #include <string.h>
+#include <cmath>
 
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
+#include <glm\glm.hpp>
+#include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtc\type_ptr.hpp>
+#include <glm\mat4x4.hpp>
 
 // Window dimentions
 const GLint WIDTH = 800, HEIGHT = 600;
 
-GLuint VAO, VBO, shaderProgram;
+GLuint VAO, VBO, shaderProgram, uniformModel;
+
+bool direction = true;
+float triOffset = 0.0f;
+float triMaxOffset = 0.7f;
+float triIncrement = 0.005f;
+
 
 // Vertex shader
 static const char* vShader = "							\n\
@@ -15,9 +26,11 @@ static const char* vShader = "							\n\
 														\n\
 layout (location = 0) in vec3 pos;						\n\
 														\n\
+uniform mat4 model;										\n\
+														\n\
 void main()												\n\
 {														\n\
-	gl_Position = vec4(0.8 * pos.xy, pos.z , 1.0);		\n\
+	gl_Position = model * vec4(0.4 * pos.xy, pos.z , 1.0);		\n\
 }";
 
 // Fragment shader
@@ -116,6 +129,7 @@ void CompileShaders()
 		return;
 	}
 
+	uniformModel = glGetUniformLocation(shaderProgram, "model");
 }
 
 int main()
@@ -174,11 +188,30 @@ int main()
 		// Get user input events
 		glfwPollEvents();
 
+		if (direction)
+		{
+			triOffset += triIncrement;
+		}
+		else
+		{
+			triOffset -= triIncrement;
+		}
+
+		if (abs(triOffset) >= triMaxOffset)
+		{
+			direction = !direction;
+		}
+
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
+
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+		model = model * glm::rotate(model, triOffset, glm::vec3(0.0, 0.0, 1.0));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
