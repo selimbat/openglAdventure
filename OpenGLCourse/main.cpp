@@ -11,6 +11,7 @@
 
 // Window dimentions
 const GLint WIDTH = 800, HEIGHT = 600;
+const float toRadians = glm::pi<float>() / 180.0f;
 
 GLuint VAO, VBO, shaderProgram, uniformModel;
 
