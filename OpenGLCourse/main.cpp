@@ -13,6 +13,7 @@
 #include "Window.h"
 #include "Mesh.h"
 #include "Shader.h"
+#include "Input.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
 
@@ -64,6 +65,7 @@ int main()
 {
 	mainWindow = Window(800, 600);
 	mainWindow.Initialise();
+	Input input = Input(mainWindow.GetGLFWWindow());
 
 	CreateObjects();
 	CreateShaders();

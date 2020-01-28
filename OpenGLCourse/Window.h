@@ -16,7 +16,7 @@ public:
 	GLfloat GetBufferHeight() { return (GLfloat)_bufferHeight; }
 
 	bool GetShouldClose() { return glfwWindowShouldClose(_window); }
-
+	GLFWwindow* GetGLFWWindow() { return _window; }
 	void SwapBuffers() { glfwSwapBuffers(_window); }
 
 	~Window();

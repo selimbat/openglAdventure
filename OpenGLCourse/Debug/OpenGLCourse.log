@@ -1,6 +1,8 @@
-﻿  main.cpp
-  Window.cpp
-  Génération de code en cours...
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Window.cpp(62): warning C4715: 'Window::Initialise' : les chemins de contrôle ne retournent pas tous une valeur
-LINK : warning LNK4098: conflit entre la bibliothÞque par dÚfaut 'MSVCRT' et les autres bibliothÞquesá; utilisez /NODEFAULTLIB:library
+﻿  Input.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(75,19): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(76,19): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(79,25): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(80,25): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(81,18): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(82,18): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
   OpenGLCourse.vcxproj -> D:\dev\Projects\OpenGLCourse\Debug\OpenGLCourse.exe
