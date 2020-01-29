@@ -9,17 +9,23 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 #include <glm\mat4x4.hpp>
+#include <glm\gtx\string_cast.hpp>
 
 #include "Window.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "Input.h"
+#include "Camera.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
+Camera camera;
+
+GLfloat deltatime = 0.0f;
+GLfloat lastTime = 0.0f;
 
 // Vertex shader
 static const char* vShader = "Shaders/shader.vert";
@@ -70,19 +76,25 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	glm::mat4 projection = glm::perspective(30.5f,
+	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.2f, &input);
+	printf(glm::to_string(camera.GetViewMatrix()).c_str());
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
 											0.1f,
 											100.0f);
 
-	GLuint uniformModel = 0, uniformProjection = 0;
+	GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
 
 	// Loop until window closed
 	while (!mainWindow.GetShouldClose())
 	{
+		GLfloat now = glfwGetTime();
+		deltatime = now - lastTime;
+		lastTime = now;
+
 		// Get user input events
 		glfwPollEvents();
-
+		camera.Update(deltatime);
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -90,11 +102,14 @@ int main()
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
+		uniformView = shaderList[0].GetViewLocation();
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.5, 0.45f, -3.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+		//glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
 		meshList[0]->RenderMesh();
 
 		model = glm::mat4(1.0f);

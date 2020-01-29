@@ -1,8 +1,5 @@
-﻿  Input.cpp
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(75,19): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(76,19): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(79,25): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(80,25): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(81,18): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
-D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(82,18): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+﻿  Camera.cpp
+  main.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\main.cpp(91,15): warning C4244: 'initialisation' : conversion de 'double' en 'GLfloat', perte possible de données
+  Génération de code en cours...
   OpenGLCourse.vcxproj -> D:\dev\Projects\OpenGLCourse\Debug\OpenGLCourse.exe
