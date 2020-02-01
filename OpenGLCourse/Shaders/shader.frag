@@ -5,9 +5,17 @@ in vec2 TexCoord;
 
 out vec4 color;
 
-uniform sampler2D Texture;
+struct DirectionalLight {
+	vec3 color;
+	float ambiantIntencity;
+};
+
+uniform sampler2D texture2D;
+uniform DirectionalLight directionalLight;
 
 void main()
 {
-	color = texture(Texture, TexCoord);
+	vec4 ambiantColor = vec4(directionalLight.color, 1.0f) * directionalLight.ambiantIntencity;
+
+	color = texture(texture2D, TexCoord) * ambiantColor;
 }

@@ -20,6 +20,7 @@
 #include "Input.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Light.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
 
@@ -30,6 +31,8 @@ Camera camera;
 
 Texture girafeTexture;
 Texture leopardTexture;
+
+Light mainLight;
 
 GLfloat deltatime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -91,13 +94,14 @@ int main()
 	leopardTexture = Texture((char*)"Textures/leopard.jpg");
 	leopardTexture.LoadTexture();
 
-	printf(glm::to_string(camera.GetViewMatrix()).c_str());
+	mainLight = Light(1.0f, 0.2f, 0.2f, 1.0f);
+
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
 											0.1f,
 											100.0f);
 
-	GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
+	GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0, uniformAmbiantColor = 0, uniformAmbiantIntencity = 0;
 
 	// Loop until window closed
 	while (!mainWindow.GetShouldClose())
@@ -117,6 +121,10 @@ int main()
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
+		uniformAmbiantColor = shaderList[0].GetAmbiantColorLocation();
+		uniformAmbiantIntencity = shaderList[0].GetAmbiantIntencityLocation();
+
+		mainLight.UseLight(uniformAmbiantIntencity, uniformAmbiantColor);
 
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.5, 0.45f, -3.0f));

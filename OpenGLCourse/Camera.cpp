@@ -29,7 +29,7 @@ glm::mat4 Camera::GetViewMatrix()
 
 void Camera::Update(GLfloat deltatime)
 {
-	HandleMouseInput();
+	UpdateRotationMovement(deltatime);
 	// no need to normalize 
 	_forward.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
 	_forward.y = sin(glm::radians(_pitch));
@@ -37,10 +37,10 @@ void Camera::Update(GLfloat deltatime)
 	_right = glm::normalize(glm::cross(_forward, _worldUp));
 	_up = glm::normalize(glm::cross(_right, _forward));
 
-	HandleKeysInput(deltatime);
+	UpdatePositionMovement(deltatime);
 }
 
-void Camera::HandleKeysInput(GLfloat deltatime)
+void Camera::UpdatePositionMovement(GLfloat deltatime)
 {
 	glm::vec3 mvtDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 	if (_input->IsForwardsPressed())
@@ -59,18 +59,35 @@ void Camera::HandleKeysInput(GLfloat deltatime)
 	{
 		mvtDirection.x -= 1.0f;
 	}
-	if (glm::length(mvtDirection) > 0)
+	if (_input->IsUpPressed())
 	{
-		mvtDirection = glm::normalize(mvtDirection);
+		mvtDirection.y += 1.0f;
+	}
+	if (_input->IsDownPressed())
+	{
+		mvtDirection.y -= 1.0f;
+	}
+	float lengthOfDirection = glm::length(mvtDirection);
+	if (lengthOfDirection > 0)
+	{
+		mvtDirection = mvtDirection / lengthOfDirection;
 	}
 
-	_position += deltatime * _moveSpeed * (mvtDirection.x * _right + mvtDirection.z * _forward);
+	_position += deltatime * _moveSpeed * (mvtDirection.x * _right + mvtDirection.y * _up + mvtDirection.z * _forward);
 }
 
-void Camera::HandleMouseInput()
+void Camera::UpdateRotationMovement(GLfloat deltatime)
 {
 	GLfloat deltaX = _input->GetXChange() * _turnSpeed;
 	GLfloat deltaY = _input->GetYChange() * _turnSpeed;
+	if (_input->IsTurnRightPressed())
+	{
+		_yaw += 500.0f * _turnSpeed * deltatime;
+	}
+	if (_input->IsTurnLeftPressed())
+	{
+		_yaw -= 500.0f * _turnSpeed * deltatime;
+	}
 	_yaw += deltaX;
 	_pitch -= deltaY; // minus sign for the regular (not inverted) control
 

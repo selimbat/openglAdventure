@@ -31,7 +31,7 @@ private:
 	GLfloat _turnSpeed;
 
 
-	void HandleKeysInput(GLfloat deltatime);
-	void HandleMouseInput();
+	void UpdatePositionMovement(GLfloat deltatime);
+	void UpdateRotationMovement(GLfloat deltatime);
 };
 
