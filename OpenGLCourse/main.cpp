@@ -21,6 +21,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "Light.h"
+#include "Material.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
 
@@ -31,6 +32,9 @@ Camera camera;
 
 Texture girafeTexture;
 Texture leopardTexture;
+
+Material shinyMaterial;
+Material dullMaterial;
 
 Light mainLight;
 
@@ -43,6 +47,39 @@ static const char* vShader = "Shaders/shader.vert";
 // Fragment shader
 static const char* fShader = "Shaders/shader.frag";
 
+void ComputeAverageNormals(unsigned int* indices,
+						   unsigned int indicesCount,
+						   GLfloat* vertices,
+						   unsigned int verticesCount,
+						   unsigned int vLength,
+						   unsigned int normalOffset)
+{
+	for (size_t i = 0; i < indicesCount; i += 3)
+	{
+		unsigned int in0 = indices[i] * vLength;
+		unsigned int in1 = indices[i + 1] * vLength;
+		unsigned int in2 = indices[i + 2] * vLength;
+		glm::vec3 v1 = glm::vec3(vertices[in1	 ] - vertices[in0	 ],
+								 vertices[in1 + 1] - vertices[in0 + 1],
+								 vertices[in1 + 2] - vertices[in0 + 2]);
+		glm::vec3 v2 = glm::vec3(vertices[in2	 ] - vertices[in0	 ],
+								 vertices[in2 + 1] - vertices[in0 + 1],
+								 vertices[in2 + 2] - vertices[in0 + 2]);
+		glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+		in0 += normalOffset; in1 += normalOffset; in2 += normalOffset;
+		vertices[in0] += normal.x; vertices[in0 + 1] += normal.y; vertices[in0 + 2] += normal.z;
+		vertices[in1] += normal.x; vertices[in1 + 1] += normal.y; vertices[in1 + 2] += normal.z;
+		vertices[in2] += normal.x; vertices[in2 + 1] += normal.y; vertices[in2 + 2] += normal.z;
+	}
+
+	for (size_t i = 0; i < verticesCount / vLength; i++)
+	{
+		unsigned nOffset = i * vLength + normalOffset;
+		glm::vec3 normal = glm::vec3(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
+		normal = glm::normalize(normal);
+		vertices[nOffset] = normal.x; vertices[nOffset + 1] = normal.y; vertices[nOffset + 2] = normal.z;
+	}
+}
 
 void CreateObjects()
 {
@@ -54,19 +91,21 @@ void CreateObjects()
 	};
 
 	GLfloat vertices[] = {
-	//	x	   y	  z		 u	   v
-		-1.0f, -1.2f, 0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 1.0f, 0.5f, 0.0f,
-		1.0f, -1.3f, 0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.5f, 1.0f
+	//	x	   y	  z		   u	   v	 n_x   n_y   n_z
+		-1.0f, -1.0f, 0.0f,   0.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 2.0f,    0.5f, 0.0f,	 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,    1.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,     0.5f, 1.0f,	 0.0f, 0.0f, 0.0f
 	};
 
+	ComputeAverageNormals(indices, 12, vertices, 32, 8, 5);
+
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indices, 20, 12);
+	obj1->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj1);
 
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMesh(vertices, indices, 20, 12);
+	obj2->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj2);
 
 }
@@ -80,7 +119,7 @@ void CreateShaders()
 
 int main()
 {
-	mainWindow = Window(800, 600);
+	mainWindow = Window(1366, 768);
 	mainWindow.Initialise();
 	Input input = Input(mainWindow.GetGLFWWindow());
 
@@ -94,14 +133,27 @@ int main()
 	leopardTexture = Texture((char*)"Textures/leopard.jpg");
 	leopardTexture.LoadTexture();
 
-	mainLight = Light(1.0f, 0.2f, 0.2f, 1.0f);
+	shinyMaterial = Material(1.0f, 32);
+	dullMaterial = Material(0.3f, 4);
+
+	mainLight = Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f,
+					  glm::vec3(2.0f, -1.0f, -1.0f), 0.3f);
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
 											0.1f,
 											100.0f);
 
-	GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0, uniformAmbiantColor = 0, uniformAmbiantIntencity = 0;
+	GLuint uniformModel = 0,
+		   uniformProjection = 0,
+		   uniformView = 0,
+		   uniformEyePosition = 0,
+		   uniformAmbiantColor = 0,
+		   uniformAmbiantIntencity = 0,
+		   uniformLightDirection = 0,
+		   uniformDiffuseIntencity = 0,
+		   uniformSpecularIntencity = 0,
+		   uniformShininess = 0;
 
 	// Loop until window closed
 	while (!mainWindow.GetShouldClose())
@@ -121,24 +173,34 @@ int main()
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
+		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformAmbiantColor = shaderList[0].GetAmbiantColorLocation();
 		uniformAmbiantIntencity = shaderList[0].GetAmbiantIntencityLocation();
+		uniformLightDirection = shaderList[0].GetLightDirectionLocation();
+		uniformDiffuseIntencity = shaderList[0].GetDiffuseIntencityLocation();
+		uniformSpecularIntencity = shaderList[0].GetSpecularIntencityLocation();
+		uniformShininess = shaderList[0].GetShininessLocation();
 
-		mainLight.UseLight(uniformAmbiantIntencity, uniformAmbiantColor);
+		mainLight.UseLight(uniformAmbiantIntencity, uniformAmbiantColor,
+						   uniformDiffuseIntencity, uniformLightDirection);
+
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+		glUniform3fv(uniformEyePosition, 1, glm::value_ptr(camera.GetPosition()));
 
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(0.5, 0.45f, -3.0f));
-		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+		model = glm::translate(model, glm::vec3(1.0f, 0.9f, -3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 
 		girafeTexture.UseTexture();
+		shinyMaterial.UseMaterial(uniformSpecularIntencity, uniformShininess);
 		meshList[0]->RenderMesh();
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-0.5, -0.45f, -3.0f));
+		model = glm::translate(model, glm::vec3(-1.0f, -0.9f, -3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		leopardTexture.UseTexture();
+		dullMaterial.UseMaterial(uniformSpecularIntencity, uniformShininess);
 		meshList[1]->RenderMesh();
 
 		glUseProgram(0);

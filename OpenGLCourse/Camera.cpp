@@ -27,6 +27,11 @@ glm::mat4 Camera::GetViewMatrix()
 	return glm::lookAt(_position, _position + _forward, _up);
 }
 
+glm::vec3 Camera::GetPosition()
+{
+	return _position;
+}
+
 void Camera::Update(GLfloat deltatime)
 {
 	UpdateRotationMovement(deltatime);

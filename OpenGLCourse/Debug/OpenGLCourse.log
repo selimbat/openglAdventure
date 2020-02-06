@@ -1,2 +1,3 @@
-﻿  Camera.cpp
+﻿  main.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\main.cpp(161,15): warning C4244: 'initialisation' : conversion de 'double' en 'GLfloat', perte possible de données
   OpenGLCourse.vcxproj -> D:\dev\Projects\OpenGLCourse\Debug\OpenGLCourse.exe
