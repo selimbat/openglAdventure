@@ -14,6 +14,7 @@
 #include <glm\mat4x4.hpp>
 #include <glm\gtx\string_cast.hpp>
 
+#include "CommonValues.h"
 #include "Window.h"
 #include "Mesh.h"
 #include "Shader.h"
@@ -21,6 +22,8 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "Light.h"
+#include "DirectionalLight.h"
+#include "PointLight.h"
 #include "Material.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
@@ -36,7 +39,8 @@ Texture leopardTexture;
 Material shinyMaterial;
 Material dullMaterial;
 
-Light mainLight;
+DirectionalLight mainLight;
+PointLight pointLights[MAX_POINT_LIGHTS];
 
 GLfloat deltatime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -98,6 +102,19 @@ void CreateObjects()
 		0.0f, 1.0f, 0.0f,     0.5f, 1.0f,	 0.0f, 0.0f, 0.0f
 	};
 
+	unsigned int floorIndices[] = {
+		0, 2, 1,
+		1, 2, 3
+	};
+
+	GLfloat floorVertices[]{
+		//	x	   y	  z		u	   v	  n_x   n_y   n_z
+		-20.0f, 0.0f, -20.0f, -20.0f, -20.0f, 0.0f, -1.0f, 0.0f,
+		20.0f, 0.0f, -20.0f,  20.0f, -20.0f,  0.0f, -1.0f, 0.0f,
+		-20.0f, 0.0f, 20.0f,  -20.0f, 20.0f,  0.0f, -1.0f, 0.0f,
+		20.0f, 0.0f, 20.0f,   -20.0f, -20.0f, 0.0f, -1.0f, 0.0f
+	};
+
 	ComputeAverageNormals(indices, 12, vertices, 32, 8, 5);
 
 	Mesh* obj1 = new Mesh();
@@ -107,6 +124,10 @@ void CreateObjects()
 	Mesh* obj2 = new Mesh();
 	obj2->CreateMesh(vertices, indices, 32, 12);
 	meshList.push_back(obj2);
+
+	Mesh* floor = new Mesh();
+	floor->CreateMesh(floorVertices, floorIndices, 32, 6);
+	meshList.push_back(floor);
 
 }
 
@@ -133,11 +154,25 @@ int main()
 	leopardTexture = Texture((char*)"Textures/leopard.jpg");
 	leopardTexture.LoadTexture();
 
-	shinyMaterial = Material(1.0f, 32);
+	shinyMaterial = Material(4.0f, 64);
 	dullMaterial = Material(0.3f, 4);
 
-	mainLight = Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f,
-					  glm::vec3(2.0f, -1.0f, -1.0f), 0.3f);
+	mainLight = DirectionalLight(glm::vec3(0.0f), 0.3f,
+								 0.8f, glm::vec3(-2.0f, -1.0f, -1.0f));
+
+	unsigned int pointLightCount = 0;
+
+	pointLights[0] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
+								0.2f, 1.0f,
+								glm::vec3(-4.0f, 0.0f, -6.0f),
+								LightAttenuationModel(0.3f, 0.1f, 0.02f));
+	pointLightCount++;
+	pointLights[1] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
+								0.4f, 0.8f,
+								glm::vec3(4.0f, -1.0f, -3.0f),
+								LightAttenuationModel(0.3f, 0.1f, 0.02f));
+	pointLightCount++;
+
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
@@ -148,11 +183,7 @@ int main()
 		   uniformProjection = 0,
 		   uniformView = 0,
 		   uniformEyePosition = 0,
-		   uniformAmbiantColor = 0,
-		   uniformAmbiantIntencity = 0,
-		   uniformLightDirection = 0,
-		   uniformDiffuseIntencity = 0,
-		   uniformSpecularIntencity = 0,
+		   uniformSpecularIntensity = 0,
 		   uniformShininess = 0;
 
 	// Loop until window closed
@@ -174,34 +205,37 @@ int main()
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
-		uniformAmbiantColor = shaderList[0].GetAmbiantColorLocation();
-		uniformAmbiantIntencity = shaderList[0].GetAmbiantIntencityLocation();
-		uniformLightDirection = shaderList[0].GetLightDirectionLocation();
-		uniformDiffuseIntencity = shaderList[0].GetDiffuseIntencityLocation();
-		uniformSpecularIntencity = shaderList[0].GetSpecularIntencityLocation();
+		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
-		mainLight.UseLight(uniformAmbiantIntencity, uniformAmbiantColor,
-						   uniformDiffuseIntencity, uniformLightDirection);
+		shaderList[0].SetDirectionalLight(&mainLight);
+		shaderList[0].SetPointLights(pointLights, pointLightCount);
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 		glUniform3fv(uniformEyePosition, 1, glm::value_ptr(camera.GetPosition()));
 
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(1.0f, 0.9f, -3.0f));
+		model = glm::translate(model, glm::vec3(1.0f, 0.9f, -7.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		girafeTexture.UseTexture();
-		shinyMaterial.UseMaterial(uniformSpecularIntencity, uniformShininess);
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[0]->RenderMesh();
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-1.0f, -0.9f, -3.0f));
+		model = glm::translate(model, glm::vec3(-1.0f, -0.9f, -7.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		leopardTexture.UseTexture();
-		dullMaterial.UseMaterial(uniformSpecularIntencity, uniformShininess);
+		dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[1]->RenderMesh();
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		girafeTexture.UseTexture();
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		meshList[2]->RenderMesh();
 
 		glUseProgram(0);
 

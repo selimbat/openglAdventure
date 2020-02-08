@@ -7,17 +7,12 @@ class Light
 {
 public:
 	Light();
-	Light(glm::vec3 color, GLfloat ambiantIntencity,
-		  glm::vec3 direction, GLfloat diffuseIntencity);
+	Light(glm::vec3 color, GLfloat ambiantIntensity, GLfloat diffuseIntensity);
 
-	void UseLight(GLuint ambiantIntencityLocation, GLuint ambiantColorLocation, 
-				  GLuint diffuseIntencityLocation, GLuint directionLocation);
 	~Light();
-private:
+protected:
 	glm::vec3 _color;
-	GLfloat _ambiantIntencity;
-
-	glm::vec3 _direction;
-	GLfloat _diffuseIntencity;
+	GLfloat _ambiantIntensity;
+	GLfloat _diffuseIntensity;
 };
 
