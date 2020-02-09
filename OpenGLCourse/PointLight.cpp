@@ -1,5 +1,4 @@
 #include "PointLight.h"
-#include <glm\gtc\type_ptr.hpp>
 
 PointLight::PointLight() : Light()
 {

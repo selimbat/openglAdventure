@@ -24,6 +24,7 @@
 #include "Light.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "Material.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
@@ -41,6 +42,7 @@ Material dullMaterial;
 
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 GLfloat deltatime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -154,25 +156,33 @@ int main()
 	leopardTexture = Texture((char*)"Textures/leopard.jpg");
 	leopardTexture.LoadTexture();
 
-	shinyMaterial = Material(4.0f, 64);
+	shinyMaterial = Material(1.0f, 32);
 	dullMaterial = Material(0.3f, 4);
 
 	mainLight = DirectionalLight(glm::vec3(0.0f), 0.3f,
-								 0.8f, glm::vec3(-2.0f, -1.0f, -1.0f));
+								 0.2f, glm::vec3(-2.0f, -1.0f, -1.0f));
 
 	unsigned int pointLightCount = 0;
 
 	pointLights[0] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
-								0.2f, 1.0f,
+								0.2f, 0.2f,
 								glm::vec3(-4.0f, 0.0f, -6.0f),
 								LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	pointLightCount++;
 	pointLights[1] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
-								0.4f, 0.8f,
+								0.2f, 0.2f,
 								glm::vec3(4.0f, -1.0f, -3.0f),
 								LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	pointLightCount++;
 
+	unsigned int spotLightCount = 0;
+	spotLights[0] = SpotLight(glm::vec3(1.0f, 1.0f, 1.0f),
+							  1.0f, 1.0f,
+							  glm::vec3(1.0f, 1.0f, 0.0f),
+							  glm::vec3(0.0f, -1.0f, 0.0f),
+							  15.0f,
+							  LightAttenuationModel(0.3f, 0.1f, 0.02f));
+	spotLightCount++;
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
@@ -208,8 +218,11 @@ int main()
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
+		spotLights[0].SetAt(camera.GetPosition(), camera.GetDirection());
+
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
+		shaderList[0].SetSpotLights(spotLights, spotLightCount);
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));

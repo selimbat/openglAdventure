@@ -12,6 +12,7 @@ public:
 	Camera() { }
 	Camera(glm::vec3 initialPos, glm::vec3 worldUp, GLfloat initialYaw, GLfloat initialPitch, GLfloat initialMoveSpeed, GLfloat initialTurnSpeed, Input* input);
 	glm::vec3 GetPosition();
+	glm::vec3 GetDirection();
 	glm::mat4 GetViewMatrix();
 	void Update(GLfloat deltatime);
 	~Camera() { }

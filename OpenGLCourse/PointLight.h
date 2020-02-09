@@ -1,4 +1,6 @@
 #pragma once
+#include <glm\gtc\type_ptr.hpp>
+
 #include "Light.h"
 #include "LightAttenuationModel.h"
 class PointLight :
@@ -11,7 +13,7 @@ public:
 				  GLuint diffuseIntensityLocation, GLuint positionLocation,
 				  GLuint constantLocation, GLuint linearLocation, GLuint quadraticLocation);
 	~PointLight();
-private:
+protected:
 	glm::vec3 _position;
 	LightAttenuationModel _lightModel;
 };
