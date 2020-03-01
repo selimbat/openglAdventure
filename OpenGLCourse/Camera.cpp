@@ -37,6 +37,21 @@ glm::vec3 Camera::GetDirection()
 	return _forward;
 }
 
+glm::vec3 Camera::GetRight()
+{
+	return _right;
+}
+
+GLfloat Camera::GetYaw()
+{
+	return _yaw;
+}
+
+GLfloat Camera::GetPitch()
+{
+	return _pitch;
+}
+
 void Camera::Update(GLfloat deltatime)
 {
 	UpdateRotationMovement(deltatime);

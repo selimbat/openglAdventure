@@ -1,6 +1,115 @@
-﻿  main.cpp
-LINK : warning LNK4098: conflit entre la bibliothèque par défaut 'MSVCRT' et les autres bibliothèques ; utilisez /NODEFAULTLIB:library
-main.obj : error LNK2019: symbole externe non résolu __imp_glewInit référencé dans la fonction main
-main.obj : error LNK2001: symbole externe non résolu __imp_glewExperimental
+﻿  Camera.cpp
+  DirectionalLight.cpp
+  Input.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(94,19): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(95,19): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(98,25): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(99,25): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(100,18): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Input.cpp(101,18): warning C4244: '=' : conversion de 'double' en 'GLfloat', perte possible de données
+  Light.cpp
+  Model.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Model.cpp(101,80): warning C4267: 'argument' : conversion de 'size_t' en 'unsigned int', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Model.cpp(121,51): warning C4267: 'initialisation' : conversion de 'size_t' en 'int', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Model.cpp(130,13): warning C4477: 'printf' : la chaîne de format '%s' nécessite un argument de type 'char *', mais l'argument variadique 1 est de type 'std::string'
+  PointLight.cpp
+  Shader.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(99,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(99,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(102,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(102,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(105,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(105,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(108,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(108,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(111,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(111,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(114,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(114,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(117,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(117,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(126,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(126,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(129,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(129,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(132,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(132,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(135,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(135,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(138,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(138,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(141,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(141,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(144,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(144,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(147,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(147,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(150,38): warning C4477: 'snprintf' : la chaîne de format '%d' nécessite un argument de type 'int', mais l'argument variadique 1 est de type 'size_t'
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(150,38): message : utilisez '%zd' dans la chaîne de format
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Shader.cpp(279,36): warning C4267: '=' : conversion de 'size_t' en 'GLint', perte possible de données
+  SpotLight.cpp
+  Texture.cpp
+  Window.cpp
+  main.cpp
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\main.cpp(84,48): warning C4267: 'initialisation' : conversion de 'size_t' en 'unsigned int', perte possible de données
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\main.cpp(204,15): warning C4244: 'initialisation' : conversion de 'double' en 'GLfloat', perte possible de données
+  Génération de code en cours...
+D:\dev\Projects\OpenGLCourse\OpenGLCourse\Window.cpp(62): warning C4715: 'Window::Initialise' : les chemins de contrôle ne retournent pas tous une valeur
+DirectionalLight.obj : error LNK2001: symbole externe non résolu __imp___glewUniform1f
+Material.obj : error LNK2001: symbole externe non résolu __imp___glewUniform1f
+PointLight.obj : error LNK2001: symbole externe non résolu __imp___glewUniform1f
+SpotLight.obj : error LNK2001: symbole externe non résolu __imp___glewUniform1f
+DirectionalLight.obj : error LNK2001: symbole externe non résolu __imp___glewUniform3fv
+main.obj : error LNK2001: symbole externe non résolu __imp___glewUniform3fv
+PointLight.obj : error LNK2001: symbole externe non résolu __imp___glewUniform3fv
+SpotLight.obj : error LNK2001: symbole externe non résolu __imp___glewUniform3fv
+Input.obj : error LNK2019: symbole externe non résolu glfwSetWindowShouldClose référencé dans la fonction "private: static void __cdecl Input::HandleKeys(struct GLFWwindow *,int,int,int,int)" (?HandleKeys@Input@@CAXPEAUGLFWwindow@@HHHH@Z)
+Input.obj : error LNK2019: symbole externe non résolu glfwSetWindowUserPointer référencé dans la fonction "public: __cdecl Input::Input(struct GLFWwindow *)" (??0Input@@QEAA@PEAUGLFWwindow@@@Z)
+Input.obj : error LNK2019: symbole externe non résolu glfwGetWindowUserPointer référencé dans la fonction "private: static void __cdecl Input::HandleKeys(struct GLFWwindow *,int,int,int,int)" (?HandleKeys@Input@@CAXPEAUGLFWwindow@@HHHH@Z)
+Input.obj : error LNK2019: symbole externe non résolu glfwSetInputMode référencé dans la fonction "public: __cdecl Input::Input(struct GLFWwindow *)" (??0Input@@QEAA@PEAUGLFWwindow@@@Z)
+Input.obj : error LNK2019: symbole externe non résolu glfwSetKeyCallback référencé dans la fonction "private: void __cdecl Input::RegisterCallbacks(struct GLFWwindow *)" (?RegisterCallbacks@Input@@AEAAXPEAUGLFWwindow@@@Z)
+Input.obj : error LNK2019: symbole externe non résolu glfwSetCursorPosCallback référencé dans la fonction "private: void __cdecl Input::RegisterCallbacks(struct GLFWwindow *)" (?RegisterCallbacks@Input@@AEAAXPEAUGLFWwindow@@@Z)
+main.obj : error LNK2019: symbole externe non résolu glfwWindowShouldClose référencé dans la fonction "public: bool __cdecl Window::GetShouldClose(void)" (?GetShouldClose@Window@@QEAA_NXZ)
+main.obj : error LNK2019: symbole externe non résolu glfwPollEvents référencé dans la fonction main
+main.obj : error LNK2019: symbole externe non résolu glfwGetTime référencé dans la fonction main
+main.obj : error LNK2019: symbole externe non résolu glfwSwapBuffers référencé dans la fonction "public: void __cdecl Window::SwapBuffers(void)" (?SwapBuffers@Window@@QEAAXXZ)
+main.obj : error LNK2001: symbole externe non résolu __imp___glewUniformMatrix4fv
+main.obj : error LNK2001: symbole externe non résolu __imp___glewUseProgram
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewUseProgram
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewBindBuffer
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewBufferData
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewDeleteBuffers
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewGenBuffers
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewEnableVertexAttribArray
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewVertexAttribPointer
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewBindVertexArray
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewDeleteVertexArrays
+Mesh.obj : error LNK2001: symbole externe non résolu __imp___glewGenVertexArrays
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewAttachShader
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewCompileShader
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewCreateProgram
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewCreateShader
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewDeleteProgram
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewGetProgramInfoLog
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewGetProgramiv
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewGetShaderInfoLog
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewGetShaderiv
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewGetUniformLocation
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewLinkProgram
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewShaderSource
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewUniform1i
+Shader.obj : error LNK2001: symbole externe non résolu __imp___glewValidateProgram
+Texture.obj : error LNK2001: symbole externe non résolu __imp___glewActiveTexture
+Texture.obj : error LNK2001: symbole externe non résolu __imp___glewGenerateMipmap
+Window.obj : error LNK2019: symbole externe non résolu __imp_glewInit référencé dans la fonction "public: int __cdecl Window::Initialise(void)" (?Initialise@Window@@QEAAHXZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwInit référencé dans la fonction "public: int __cdecl Window::Initialise(void)" (?Initialise@Window@@QEAAHXZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwTerminate référencé dans la fonction "public: __cdecl Window::~Window(void)" (??1Window@@QEAA@XZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwWindowHint référencé dans la fonction "public: int __cdecl Window::Initialise(void)" (?Initialise@Window@@QEAAHXZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwCreateWindow référencé dans la fonction "public: int __cdecl Window::Initialise(void)" (?Initialise@Window@@QEAAHXZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwDestroyWindow référencé dans la fonction "public: __cdecl Window::~Window(void)" (??1Window@@QEAA@XZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwGetFramebufferSize référencé dans la fonction "public: int __cdecl Window::Initialise(void)" (?Initialise@Window@@QEAAHXZ)
+Window.obj : error LNK2019: symbole externe non résolu glfwMakeContextCurrent référencé dans la fonction "public: int __cdecl Window::Initialise(void)" (?Initialise@Window@@QEAAHXZ)
+Window.obj : error LNK2001: symbole externe non résolu __imp_glewExperimental
 D:\dev\Projects\OpenGLCourse\..\..\External Libs\GLEW\lib\Release\Win32\glew32.lib : warning LNK4272: type d'ordinateur bibliothèque 'x86' en conflit avec le type d'ordinateur cible 'x64'
-D:\dev\Projects\OpenGLCourse\x64\Debug\OpenGLCourse.exe : fatal error LNK1120: 2 externes non résolus
+D:\dev\Projects\OpenGLCourse\..\..\External Libs\GLFW\lib-vc2019\glfw3.lib : warning LNK4272: type d'ordinateur bibliothèque 'x86' en conflit avec le type d'ordinateur cible 'x64'
+D:\dev\Projects\OpenGLCourse\x64\Debug\OpenGLCourse.exe : fatal error LNK1120: 48 externes non résolus

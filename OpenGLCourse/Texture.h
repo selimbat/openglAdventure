@@ -8,9 +8,9 @@ class Texture
 {
 public:
 	Texture();
-	Texture(char* fileLocation);
+	Texture(const char* fileLocation);
 
-	void LoadTexture();
+	bool LoadTexture(bool shouldLoadAlpha = false);
 	void UseTexture();
 	void ClearTexture();
 	~Texture();
@@ -18,6 +18,6 @@ private:
 	GLuint _textureId;
 	int _width, _height, _bitDepth;
 	
-	char* _fileLocation;
+	const char* _fileLocation;
 };
 

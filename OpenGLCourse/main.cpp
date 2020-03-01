@@ -26,6 +26,7 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Material.h"
+#include "Model.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
 
@@ -34,8 +35,12 @@ std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 Camera camera;
 
+Model falconMillenium = Model();
+Model xWing = Model();
+
 Texture girafeTexture;
 Texture leopardTexture;
+Texture placeholderTexture;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -139,7 +144,6 @@ void CreateShaders()
 	shader1->CreateFromFile(vShader, fShader);
 	shaderList.push_back(*shader1);
 }
-
 int main()
 {
 	mainWindow = Window(1366, 768);
@@ -151,10 +155,15 @@ int main()
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.2f, &input);
 
+	falconMillenium.LoadModel("Models/millenium-falcon.obj");
+	xWing.LoadModel("Models/star wars x-wing.obj");
+
 	girafeTexture = Texture((char*)"Textures/girafe.jpg");
 	girafeTexture.LoadTexture();
 	leopardTexture = Texture((char*)"Textures/leopard.jpg");
 	leopardTexture.LoadTexture();
+	placeholderTexture = Texture((char*)"Textures/white_square.png");
+	placeholderTexture.LoadTexture();
 
 	shinyMaterial = Material(1.0f, 32);
 	dullMaterial = Material(0.3f, 4);
@@ -246,14 +255,30 @@ int main()
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		girafeTexture.UseTexture();
+		placeholderTexture.UseTexture();
 		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[2]->RenderMesh();
+
+		model = glm::mat4(1.0f);
+		model = glm::scale(model, glm::vec3(0.001f));
+		model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		falconMillenium.RenderModel();
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -1.9f, 0.0f));
+		model = glm::rotate(model, glm::radians(-150.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		xWing.RenderModel();
+
+
 
 		glUseProgram(0);
 
 		mainWindow.SwapBuffers();
 	}
-
 	return 0;
 }
