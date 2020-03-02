@@ -4,6 +4,7 @@ in vec4 vCol;
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPosition;
+in vec4 directionalLightSpacePos;
 
 out vec4 color;
 
@@ -53,10 +54,23 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 uniform sampler2D texture2D;
+uniform sampler2D directionalShadowMap;
 uniform Material material;
 uniform vec3 eyePosition;
 
-vec4 ComputeLightFromDirection(Light light, vec3 direction)
+float ComputeDirectionalShadowFactor(DirectionalLight light)
+{
+	vec3 projCoords = directionalLightSpacePos.xyz / directionalLightSpacePos.w;
+	projCoords = (projCoords * 0.5) + vec3(0.5);
+
+	float closest = texture(directionalShadowMap, projCoords.xy).r;
+	float current = projCoords.z;
+
+	float shadow = current > closest ? 1.0 : 0.0;
+	return shadow;
+}
+
+vec4 ComputeLightFromDirection(Light light, vec3 direction, float shadowFactor)
 {
 	vec4 ambiantColor = vec4(light.color, 1.0f) * light.ambiantIntensity;
 	
@@ -77,12 +91,13 @@ vec4 ComputeLightFromDirection(Light light, vec3 direction)
 			specularColor = vec4(light.color * material.specularIntensity * specularFactor, 1.0f);
 		}
 	}
-	return ambiantColor + diffuseColor + specularColor;
+	return ambiantColor + (1.0 - shadowFactor) * (diffuseColor + specularColor);
 }
 
 vec4 ComputeDirectionalLight()
 {
-	return ComputeLightFromDirection(directionalLight.base, directionalLight.direction);
+	float shadowFactor = ComputeDirectionalShadowFactor(directionalLight);
+	return ComputeLightFromDirection(directionalLight.base, directionalLight.direction, shadowFactor);
 }
 
 vec4 ComputePointLight(PointLight pointLight)
@@ -93,7 +108,7 @@ vec4 ComputePointLight(PointLight pointLight)
 	{
 		direction = direction / distanceToLight;
 	}
-	vec4 color = ComputeLightFromDirection(pointLight.base, direction);
+	vec4 color = ComputeLightFromDirection(pointLight.base, direction, 0.0f);
 	float attenuation = pointLight.quadratic * distanceToLight * distanceToLight
 					  + pointLight.linear * distanceToLight
 					  + pointLight.constant;

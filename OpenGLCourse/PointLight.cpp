@@ -10,7 +10,7 @@ PointLight::PointLight(glm::vec3 color,
 					   GLfloat ambiantIntensity,
 					   GLfloat diffuseIntensity,
 					   glm::vec3 position,
-					   LightAttenuationModel lightModel) : Light(color, ambiantIntensity, diffuseIntensity)
+					   LightAttenuationModel lightModel) : Light(color, ambiantIntensity, diffuseIntensity, 1024, 1024)
 {
 	_position = position;
 	_lightModel = lightModel;

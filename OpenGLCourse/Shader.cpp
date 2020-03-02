@@ -30,7 +30,7 @@ std::string Shader::ReadFile(const char* fileLocation)
 {
 	std::string content;
 	std::ifstream fileStream(fileLocation, std::ios::in);
-	
+
 	if (!fileStream.is_open())
 	{
 		printf("ERROR: Failed to read %s! File doesn't exist.", fileLocation);
@@ -151,6 +151,10 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 		_uniformSpotLights[i].UniformCutOffCos = glGetUniformLocation(_shaderId, locBuff);
 	}
 
+	_uniformTexture = glGetUniformLocation(_shaderId, "texture2D");
+	_uniformDirectionalLightTranform = glGetUniformLocation(_shaderId, "directionalLightTransform");
+	_uniformDirectionalShadowMap = glGetUniformLocation(_shaderId, "directionalShadowMap");
+
 }
 
 GLuint Shader::GetProjectionLocation()
@@ -199,9 +203,9 @@ GLuint Shader::GetShininessLocation()
 void Shader::SetDirectionalLight(DirectionalLight* directionalLight)
 {
 	directionalLight->UseLight(_uniformDirectionalLight.UniformAmbiantIntensity,
-							   _uniformDirectionalLight.UniformColor,
-							   _uniformDirectionalLight.UniformDiffuseIntensity,
-							   _uniformDirectionalLight.UniformDirection);
+		_uniformDirectionalLight.UniformColor,
+		_uniformDirectionalLight.UniformDiffuseIntensity,
+		_uniformDirectionalLight.UniformDirection);
 }
 
 void Shader::SetPointLights(PointLight* pointLights, unsigned int lightCount)
@@ -215,12 +219,12 @@ void Shader::SetPointLights(PointLight* pointLights, unsigned int lightCount)
 	for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
 	{
 		pointLights[i].UseLight(_uniformPointLights[i].UniformAmbiantIntensity,
-								_uniformPointLights[i].UniformColor,
-								_uniformPointLights[i].UniformDiffuseIntensity,
-								_uniformPointLights[i].UniformPosition,
-								_uniformPointLights[i].UniformConstant,
-								_uniformPointLights[i].UniformLinear,
-								_uniformPointLights[i].UniformQuadratic);
+			_uniformPointLights[i].UniformColor,
+			_uniformPointLights[i].UniformDiffuseIntensity,
+			_uniformPointLights[i].UniformPosition,
+			_uniformPointLights[i].UniformConstant,
+			_uniformPointLights[i].UniformLinear,
+			_uniformPointLights[i].UniformQuadratic);
 	}
 }
 
@@ -235,15 +239,30 @@ void Shader::SetSpotLights(SpotLight* spotLights, unsigned int lightCount)
 	for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
 	{
 		spotLights[i].UseLight(_uniformSpotLights[i].UniformAmbiantIntensity,
-							   _uniformSpotLights[i].UniformColor,
-							   _uniformSpotLights[i].UniformDiffuseIntensity,
-							   _uniformSpotLights[i].UniformPosition,
-							   _uniformSpotLights[i].UniformDirection,
-							   _uniformSpotLights[i].UniformConstant,
-							   _uniformSpotLights[i].UniformLinear,
-							   _uniformSpotLights[i].UniformQuadratic,
-							   _uniformSpotLights[i].UniformCutOffCos);
+			_uniformSpotLights[i].UniformColor,
+			_uniformSpotLights[i].UniformDiffuseIntensity,
+			_uniformSpotLights[i].UniformPosition,
+			_uniformSpotLights[i].UniformDirection,
+			_uniformSpotLights[i].UniformConstant,
+			_uniformSpotLights[i].UniformLinear,
+			_uniformSpotLights[i].UniformQuadratic,
+			_uniformSpotLights[i].UniformCutOffCos);
 	}
+}
+
+void Shader::SetTexture(GLuint textureUnit)
+{
+	glUniform1i(_uniformTexture, textureUnit);
+}
+
+void Shader::SetDirectionalShadowMap(GLuint textureUnit)
+{
+	glUniform1i(_uniformDirectionalShadowMap, textureUnit);
+}
+
+void Shader::SetDirectionalLightTransform(glm::mat4* lTransform)
+{
+	glUniformMatrix4fv(_uniformDirectionalLightTranform, 1, GL_FALSE, glm::value_ptr(*lTransform));
 }
 
 GLuint Shader::GetEyePositionLocation()

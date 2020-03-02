@@ -27,12 +27,15 @@
 #include "SpotLight.h"
 #include "Material.h"
 #include "Model.h"
+#include "main.h"
 
 const float toRadians = glm::pi<float>() / 180.0f;
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
+Shader directionalShadowShader;
+
 Camera camera;
 
 Model falconMillenium = Model();
@@ -48,6 +51,16 @@ Material dullMaterial;
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
 SpotLight spotLights[MAX_SPOT_LIGHTS];
+unsigned int pointLightCount = 0;
+unsigned int spotLightCount = 0;
+
+GLuint uniformModel = 0,
+	   uniformProjection = 0,
+	   uniformView = 0,
+	   uniformEyePosition = 0,
+	   uniformSpecularIntensity = 0,
+	   uniformShininess = 0;
+
 
 GLfloat deltatime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -59,23 +72,23 @@ static const char* vShader = "Shaders/shader.vert";
 static const char* fShader = "Shaders/shader.frag";
 
 void ComputeAverageNormals(unsigned int* indices,
-						   unsigned int indicesCount,
-						   GLfloat* vertices,
-						   unsigned int verticesCount,
-						   unsigned int vLength,
-						   unsigned int normalOffset)
+	unsigned int indicesCount,
+	GLfloat* vertices,
+	unsigned int verticesCount,
+	unsigned int vLength,
+	unsigned int normalOffset)
 {
 	for (size_t i = 0; i < indicesCount; i += 3)
 	{
 		unsigned int in0 = indices[i] * vLength;
 		unsigned int in1 = indices[i + 1] * vLength;
 		unsigned int in2 = indices[i + 2] * vLength;
-		glm::vec3 v1 = glm::vec3(vertices[in1	 ] - vertices[in0	 ],
-								 vertices[in1 + 1] - vertices[in0 + 1],
-								 vertices[in1 + 2] - vertices[in0 + 2]);
-		glm::vec3 v2 = glm::vec3(vertices[in2	 ] - vertices[in0	 ],
-								 vertices[in2 + 1] - vertices[in0 + 1],
-								 vertices[in2 + 2] - vertices[in0 + 2]);
+		glm::vec3 v1 = glm::vec3(vertices[in1] - vertices[in0],
+			vertices[in1 + 1] - vertices[in0 + 1],
+			vertices[in1 + 2] - vertices[in0 + 2]);
+		glm::vec3 v2 = glm::vec3(vertices[in2] - vertices[in0],
+			vertices[in2 + 1] - vertices[in0 + 1],
+			vertices[in2 + 2] - vertices[in0 + 2]);
 		glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
 		in0 += normalOffset; in1 += normalOffset; in2 += normalOffset;
 		vertices[in0] += normal.x; vertices[in0 + 1] += normal.y; vertices[in0 + 2] += normal.z;
@@ -102,11 +115,11 @@ void CreateObjects()
 	};
 
 	GLfloat vertices[] = {
-	//	x	   y	  z		   u	   v	 n_x   n_y   n_z
-		-1.0f, -1.0f, 0.0f,   0.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 2.0f,    0.5f, 0.0f,	 0.0f, 0.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,    1.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,     0.5f, 1.0f,	 0.0f, 0.0f, 0.0f
+		//	x	   y	  z		   u	   v	 n_x   n_y   n_z
+			-1.0f, -1.0f, 0.0f,   0.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 2.0f,    0.5f, 0.0f,	 0.0f, 0.0f, 0.0f,
+			1.0f, -1.0f, 0.0f,    1.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,     0.5f, 1.0f,	 0.0f, 0.0f, 0.0f
 	};
 
 	unsigned int floorIndices[] = {
@@ -140,10 +153,103 @@ void CreateObjects()
 
 void CreateShaders()
 {
-	Shader *shader1 = new Shader();
+	Shader* shader1 = new Shader();
 	shader1->CreateFromFile(vShader, fShader);
 	shaderList.push_back(*shader1);
+
+	directionalShadowShader = Shader();
+	directionalShadowShader.CreateFromFile("Shaders/directional_shadow_map.vert",
+		"Shaders/directional_shadow_map.frag");
 }
+void RenderScene()
+{
+	glm::mat4 model(1.0f);
+	model = glm::translate(model, glm::vec3(1.0f, 0.9f, -7.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+	girafeTexture.UseTexture();
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	meshList[0]->RenderMesh();
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(-1.0f, -0.9f, -7.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	leopardTexture.UseTexture();
+	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	meshList[1]->RenderMesh();
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	placeholderTexture.UseTexture();
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	meshList[2]->RenderMesh();
+
+	model = glm::mat4(1.0f);
+	model = glm::scale(model, glm::vec3(0.001f));
+	model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	falconMillenium.RenderModel();
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -1.9f, 0.0f));
+	model = glm::rotate(model, glm::radians(-150.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(0.1f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	xWing.RenderModel();
+}
+
+void DirectionalShadowMapPass(DirectionalLight* light)
+{
+	directionalShadowShader.UseShader();
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+	light->GetShadowMap()->Write();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	uniformModel = directionalShadowShader.GetModelLocation();
+	directionalShadowShader.SetDirectionalLightTransform(&light->CalculateLightTransform());
+
+	RenderScene();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
+{
+	shaderList[0].UseShader();
+	uniformModel = shaderList[0].GetModelLocation();
+	uniformProjection = shaderList[0].GetProjectionLocation();
+	uniformView = shaderList[0].GetViewLocation();
+	uniformEyePosition = shaderList[0].GetEyePositionLocation();
+	uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
+	uniformShininess = shaderList[0].GetShininessLocation();
+
+	glViewport(0, 0, 1366, 768);
+
+	// Clear the window
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniform3fv(uniformEyePosition, 1, glm::value_ptr(camera.GetPosition()));
+
+	shaderList[0].SetDirectionalLight(&mainLight);
+	shaderList[0].SetPointLights(pointLights, pointLightCount);
+	shaderList[0].SetSpotLights(spotLights, spotLightCount);
+	shaderList[0].SetDirectionalLightTransform(&mainLight.CalculateLightTransform());
+
+	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
+	shaderList[0].SetTexture(0);
+	shaderList[0].SetDirectionalShadowMap(1);
+
+	spotLights[0].SetAt(camera.GetPosition(), camera.GetDirection());
+
+	RenderScene();
+}
+
 int main()
 {
 	mainWindow = Window(1366, 768);
@@ -168,42 +274,34 @@ int main()
 	shinyMaterial = Material(1.0f, 32);
 	dullMaterial = Material(0.3f, 4);
 
-	mainLight = DirectionalLight(glm::vec3(0.0f), 0.3f,
-								 0.2f, glm::vec3(-2.0f, -1.0f, -1.0f));
+	mainLight = DirectionalLight(glm::vec3(1.0f), 0.3f,
+		0.2f, glm::vec3(-2.0f, -1.0f, -1.0f), 1024, 1024);
 
-	unsigned int pointLightCount = 0;
 
 	pointLights[0] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
-								0.2f, 0.2f,
-								glm::vec3(-4.0f, 0.0f, -6.0f),
-								LightAttenuationModel(0.3f, 0.1f, 0.02f));
+		0.2f, 0.2f,
+		glm::vec3(-4.0f, 0.0f, -6.0f),
+		LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	pointLightCount++;
 	pointLights[1] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
-								0.2f, 0.2f,
-								glm::vec3(4.0f, -1.0f, -3.0f),
-								LightAttenuationModel(0.3f, 0.1f, 0.02f));
+		0.2f, 0.2f,
+		glm::vec3(4.0f, -1.0f, -3.0f),
+		LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	pointLightCount++;
 
-	unsigned int spotLightCount = 0;
 	spotLights[0] = SpotLight(glm::vec3(1.0f, 1.0f, 1.0f),
-							  1.0f, 1.0f,
-							  glm::vec3(1.0f, 1.0f, 0.0f),
-							  glm::vec3(0.0f, -1.0f, 0.0f),
-							  15.0f,
-							  LightAttenuationModel(0.3f, 0.1f, 0.02f));
+		1.0f, 1.0f,
+		glm::vec3(1.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		15.0f,
+		LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	spotLightCount++;
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
-											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
-											0.1f,
-											100.0f);
+		mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
+		0.1f,
+		100.0f);
 
-	GLuint uniformModel = 0,
-		   uniformProjection = 0,
-		   uniformView = 0,
-		   uniformEyePosition = 0,
-		   uniformSpecularIntensity = 0,
-		   uniformShininess = 0;
 
 	// Loop until window closed
 	while (!mainWindow.GetShouldClose())
@@ -215,65 +313,9 @@ int main()
 		// Get user input events
 		glfwPollEvents();
 		camera.Update(deltatime);
-		// Clear the window
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shaderList[0].UseShader();
-		uniformModel = shaderList[0].GetModelLocation();
-		uniformProjection = shaderList[0].GetProjectionLocation();
-		uniformView = shaderList[0].GetViewLocation();
-		uniformEyePosition = shaderList[0].GetEyePositionLocation();
-		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
-		uniformShininess = shaderList[0].GetShininessLocation();
-
-		spotLights[0].SetAt(camera.GetPosition(), camera.GetDirection());
-
-		shaderList[0].SetDirectionalLight(&mainLight);
-		shaderList[0].SetPointLights(pointLights, pointLightCount);
-		shaderList[0].SetSpotLights(spotLights, spotLightCount);
-
-		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
-		glUniform3fv(uniformEyePosition, 1, glm::value_ptr(camera.GetPosition()));
-
-		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(1.0f, 0.9f, -7.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-		girafeTexture.UseTexture();
-		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		meshList[0]->RenderMesh();
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-1.0f, -0.9f, -7.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		leopardTexture.UseTexture();
-		dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		meshList[1]->RenderMesh();
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		placeholderTexture.UseTexture();
-		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		meshList[2]->RenderMesh();
-
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.001f));
-		model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		falconMillenium.RenderModel();
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -1.9f, 0.0f));
-		model = glm::rotate(model, glm::radians(-150.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		xWing.RenderModel();
-
+		DirectionalShadowMapPass(&mainLight);
+		RenderPass(projection, camera.GetViewMatrix());
 
 
 		glUseProgram(0);
