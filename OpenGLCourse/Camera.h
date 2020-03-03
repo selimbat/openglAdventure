@@ -18,6 +18,8 @@ public:
 	GLfloat GetPitch();
 	glm::mat4 GetViewMatrix();
 	void Update(GLfloat deltatime);
+	void UpdateRotation();
+	void CircleAround(glm::vec3 position);
 	~Camera() { }
 
 private:
@@ -37,6 +39,6 @@ private:
 
 
 	void UpdatePositionMovement(GLfloat deltatime);
-	void UpdateRotationMovement(GLfloat deltatime);
+	void UpdateRotationAngles(GLfloat deltatime);
 };
 

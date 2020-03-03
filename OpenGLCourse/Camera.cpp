@@ -54,15 +54,30 @@ GLfloat Camera::GetPitch()
 
 void Camera::Update(GLfloat deltatime)
 {
-	UpdateRotationMovement(deltatime);
-	// no need to normalize 
+	UpdateRotationAngles(deltatime);
+	UpdateRotation();
+
+	UpdatePositionMovement(deltatime);
+}
+
+void Camera::UpdateRotation()
+{
+	// no need to normalize forward
 	_forward.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
 	_forward.y = sin(glm::radians(_pitch));
 	_forward.z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
 	_right = glm::normalize(glm::cross(_forward, _worldUp));
 	_up = glm::normalize(glm::cross(_right, _forward));
+}
 
-	UpdatePositionMovement(deltatime);
+void Camera::CircleAround(glm::vec3 position)
+{
+	GLfloat time = glfwGetTime();
+	GLfloat angle = 1.0f * time;
+	_position = position + 3.0f * glm::vec3(cos(angle), 0.5f, sin(angle));
+	_pitch = -30.0f;
+	_yaw = glm::degrees(angle) + 180.0f;
+	UpdateRotation();
 }
 
 void Camera::UpdatePositionMovement(GLfloat deltatime)
@@ -101,7 +116,7 @@ void Camera::UpdatePositionMovement(GLfloat deltatime)
 	_position += deltatime * _moveSpeed * (mvtDirection.x * _right + mvtDirection.y * _up + mvtDirection.z * _forward);
 }
 
-void Camera::UpdateRotationMovement(GLfloat deltatime)
+void Camera::UpdateRotationAngles(GLfloat deltatime)
 {
 	GLfloat deltaX = _input->GetXChange() * _turnSpeed;
 	GLfloat deltaY = _input->GetYChange() * _turnSpeed;

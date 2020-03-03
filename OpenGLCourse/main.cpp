@@ -40,6 +40,7 @@ Camera camera;
 
 Model falconMillenium = Model();
 Model xWing = Model();
+Model utahTeapot = Model();
 
 Texture girafeTexture;
 Texture leopardTexture;
@@ -161,12 +162,19 @@ void CreateShaders()
 	directionalShadowShader.CreateFromFile("Shaders/directional_shadow_map.vert",
 		"Shaders/directional_shadow_map.frag");
 }
+
 void RenderScene()
 {
 	glm::mat4 model(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 1.0f));
+	model = glm::scale(model, glm::vec3(0.05f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	utahTeapot.RenderModel();
+	
+	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(1.0f, 0.9f, -7.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
 	girafeTexture.UseTexture();
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 	meshList[0]->RenderMesh();
@@ -187,13 +195,13 @@ void RenderScene()
 
 	model = glm::mat4(1.0f);
 	model = glm::scale(model, glm::vec3(0.001f));
-	model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 	falconMillenium.RenderModel();
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -1.9f, 0.0f));
+	model = glm::translate(model, glm::vec3(-1.0f, -1.9f, -1.0f));
 	model = glm::rotate(model, glm::radians(-150.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(0.1f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -245,8 +253,6 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	shaderList[0].SetTexture(0);
 	shaderList[0].SetDirectionalShadowMap(1);
 
-	spotLights[0].SetAt(camera.GetPosition(), camera.GetDirection());
-
 	RenderScene();
 }
 
@@ -263,6 +269,7 @@ int main()
 
 	falconMillenium.LoadModel("Models/millenium-falcon.obj");
 	xWing.LoadModel("Models/star wars x-wing.obj");
+	utahTeapot.LoadModel("Models/utah-teapot.obj");
 
 	girafeTexture = Texture((char*)"Textures/girafe.jpg");
 	girafeTexture.LoadTexture();
@@ -271,36 +278,35 @@ int main()
 	placeholderTexture = Texture((char*)"Textures/white_square.png");
 	placeholderTexture.LoadTexture();
 
-	shinyMaterial = Material(1.0f, 32);
-	dullMaterial = Material(0.3f, 4);
+	shinyMaterial = Material(0.5f, 32);
+	dullMaterial = Material(0.3f, 1);
 
 	mainLight = DirectionalLight(glm::vec3(1.0f), 0.3f,
-		0.2f, glm::vec3(-2.0f, -1.0f, -1.0f), 1024, 1024);
+								 0.2f, glm::vec3(-2.0f, -1.0f, -1.0f), 1024, 1024);
 
-
-	pointLights[0] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
-		0.2f, 0.2f,
-		glm::vec3(-4.0f, 0.0f, -6.0f),
-		LightAttenuationModel(0.3f, 0.1f, 0.02f));
+	pointLights[0] = PointLight(glm::vec3(1.0f),
+								0.2f, 0.2f,
+								glm::vec3(-4.0f, 0.0f, -6.0f),
+								LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	pointLightCount++;
-	pointLights[1] = PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
-		0.2f, 0.2f,
-		glm::vec3(4.0f, -1.0f, -3.0f),
-		LightAttenuationModel(0.3f, 0.1f, 0.02f));
+	pointLights[1] = PointLight(glm::vec3(1.0f, 0.6f, 1.0f),
+								0.2f, 0.2f,
+								glm::vec3(11.0f, 0.0f, 11.0f),
+								LightAttenuationModel(1.0f, 0.1f, 0.02f));
 	pointLightCount++;
 
-	spotLights[0] = SpotLight(glm::vec3(1.0f, 1.0f, 1.0f),
-		1.0f, 1.0f,
-		glm::vec3(1.0f, 1.0f, 0.0f),
-		glm::vec3(0.0f, -1.0f, 0.0f),
-		15.0f,
-		LightAttenuationModel(0.3f, 0.1f, 0.02f));
+	spotLights[0] = SpotLight(glm::vec3(0.7f),
+							  0.2f, 0.3f,
+							  glm::vec3(1.0f, 0.0f, 1.0f),
+							  glm::vec3(-1.0f, -1.0f, -1.0f),
+							  20.0f,
+							  LightAttenuationModel(0.3f, 0.1f, 0.02f));
 	spotLightCount++;
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
-		mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
-		0.1f,
-		100.0f);
+											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
+											0.1f,
+											100.0f);
 
 
 	// Loop until window closed
