@@ -13,7 +13,12 @@ SpotLight::SpotLight(glm::vec3 color,
 					 glm::vec3 position,
 					 glm::vec3 direction,
 					 GLfloat cutOffAngle,
-					 LightAttenuationModel lightModel) : PointLight(color, ambiantIntensity, diffuseIntensity, position, lightModel)
+					 LightAttenuationModel lightModel,
+					 GLuint shadowWidth,
+					 GLuint shadowHeight,
+					 GLfloat near,
+					 GLfloat far) : PointLight(color, ambiantIntensity, diffuseIntensity, position,
+											   lightModel, shadowWidth, shadowHeight, near, far)
 {
 	_direction = glm::normalize(direction);
 	_cutOffAngle = cutOffAngle;
@@ -39,9 +44,6 @@ void SpotLight::SetAt(glm::vec3 position, glm::vec3 direction)
 	SetDirection(direction);
 }
 
-SpotLight::~SpotLight()
-{
-}
 
 void SpotLight::SetPosition(glm::vec3 position)
 {
@@ -51,4 +53,8 @@ void SpotLight::SetPosition(glm::vec3 position)
 void SpotLight::SetDirection(glm::vec3 direction)
 {
 	_direction = direction;
+}
+
+SpotLight::~SpotLight()
+{
 }

@@ -18,7 +18,9 @@ public:
 	Shader();
 
 	void CreateFromString(const char* vertexCode, const char* fragmentCode);
-	void CreateFromFile(const char* vertexLocation, const char* fragmentLocation);
+	void CreateFromFile(const char* vertexLocation, const char* fragmentLocation, const char* geometryLocation = nullptr);
+
+	void Validate();
 
 	std::string ReadFile(const char* fileLocation);
 
@@ -32,13 +34,16 @@ public:
 	GLuint GetLightDirectionLocation();
 	GLuint GetSpecularIntensityLocation();
 	GLuint GetShininessLocation();
+	GLuint GetPointLightPositionLocation();
+	GLuint GetFarPlaneLocation();
 
 	void SetDirectionalLight(DirectionalLight* directionalLight);
-	void SetPointLights(PointLight* pointLights, unsigned int lightCount);
-	void SetSpotLights(SpotLight* spotLights, unsigned int lightCount);
+	void SetPointLights(PointLight* pointLights, unsigned int lightCount, unsigned int textureUnit);
+	void SetSpotLights(SpotLight* spotLights, unsigned int lightCount, unsigned int textureUnit, unsigned int offset);
 	void SetTexture(GLuint textureUnit);
 	void SetDirectionalShadowMap(GLuint textureUnit);
 	void SetDirectionalLightTransform(glm::mat4* lTransform);
+	void SetLightMatrices(std::vector<glm::mat4> lightMatrices);
 
 	void UseShader();
 	void ClearShader();
@@ -58,7 +63,11 @@ private:
 		   _uniformShininess,
 		   _uniformTexture,
 		   _uniformDirectionalLightTranform,
-		   _uniformDirectionalShadowMap;
+		   _uniformDirectionalShadowMap,
+		   _uniformOmniLightPos,
+		   _uniformFarPlane;
+
+	GLuint _uniformLightMatrices[6];
 
 	struct
 	{
@@ -96,7 +105,14 @@ private:
 		GLuint UniformCutOffCos;
 	} _uniformSpotLights[MAX_SPOT_LIGHTS];
 
-	void CompileShader(const char* vertexCode, const char* fragmentCode);
+	struct
+	{
+		GLuint shadowMap;
+		GLfloat farPlane;
+	} _uniformOmniShadowMaps[MAX_POINT_LIGHTS + MAX_SPOT_LIGHTS];
+
+	void CompileShader(const char* vertexCode, const char* fragmentCode, const char* geometryCode = nullptr);
+	void CompileProgram(bool& retflag);
 	void AddShader(GLuint programId, const char* shaderCode, GLenum shaderType);
 };
 

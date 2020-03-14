@@ -1,6 +1,7 @@
 #pragma once
 #include <glm\gtc\type_ptr.hpp>
 #include "Light.h"
+#include "ShadowMap.h"
 class DirectionalLight : 
 	public Light
 {
@@ -11,6 +12,8 @@ public:
 				     GLfloat diffuseIntencity, glm::vec3 direction,
 					 GLfloat shadowWidth, GLfloat shadowHeight);
 
+	virtual ShadowMap* GetShadowMap();
+
 	void UseLight(GLuint ambiantIntensityLocation, GLuint ambiantColorLocation,
 				  GLuint diffuseIntensityLocation, GLuint directionLocation);
 	
@@ -19,5 +22,6 @@ public:
 	~DirectionalLight();
 private:
 	glm::vec3 _direction;
+	ShadowMap* _shadowMap;
 };
 

@@ -9,9 +9,9 @@ class Light
 {
 public:
 	Light();
-	Light(glm::vec3 color, GLfloat ambiantIntensity, GLfloat diffuseIntensity, GLfloat shadowWidth, GLfloat shadowHeight);
+	Light(glm::vec3 color, GLfloat ambiantIntensity, GLfloat diffuseIntensity);
 
-	ShadowMap* GetShadowMap();
+	virtual ShadowMap* GetShadowMap() = 0;
 
 	~Light();
 protected:
@@ -20,7 +20,5 @@ protected:
 	GLfloat _diffuseIntensity;
 
 	glm::mat4 _lightProj;
-
-	ShadowMap* _shadowMap;
 };
 

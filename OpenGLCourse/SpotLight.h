@@ -11,7 +11,11 @@ public:
 			  glm::vec3 position,
 			  glm::vec3 direction,
 			  GLfloat cutOffAngle,
-			  LightAttenuationModel lightModel);
+			  LightAttenuationModel lightModel,
+			  GLuint shadowWidth,
+			  GLuint shadowHeight,
+			  GLfloat near,
+			  GLfloat far);
 	void UseLight(GLuint ambiantIntensityLocation, GLuint ambiantColorLocation,
 				  GLuint diffuseIntensityLocation, GLuint positionLocation, GLuint directionLocation,
 				  GLuint constantLocation, GLuint linearLocation, GLuint quadraticLocation, GLuint cutOffAngleLocation);

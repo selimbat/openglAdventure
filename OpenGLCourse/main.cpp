@@ -32,19 +32,22 @@
 const float toRadians = glm::pi<float>() / 180.0f;
 
 Window mainWindow;
-std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 Shader directionalShadowShader;
+Shader omniShadowShader;
 
 Camera camera;
 
+Mesh* floorMesh = new Mesh();
 Model falconMillenium = Model();
-Model xWing = Model();
+Model bunny = Model();
+Model dragon = Model();
 Model utahTeapot = Model();
 
 Texture girafeTexture;
 Texture leopardTexture;
 Texture placeholderTexture;
+Texture grayTexture;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -60,7 +63,9 @@ GLuint uniformModel = 0,
 	   uniformView = 0,
 	   uniformEyePosition = 0,
 	   uniformSpecularIntensity = 0,
-	   uniformShininess = 0;
+	   uniformShininess = 0,
+	   uniformOmniLightPos = 0,
+	   uniformFarPlane = 0;
 
 
 GLfloat deltatime = 0.0f;
@@ -72,57 +77,8 @@ static const char* vShader = "Shaders/shader.vert";
 // Fragment shader
 static const char* fShader = "Shaders/shader.frag";
 
-void ComputeAverageNormals(unsigned int* indices,
-	unsigned int indicesCount,
-	GLfloat* vertices,
-	unsigned int verticesCount,
-	unsigned int vLength,
-	unsigned int normalOffset)
-{
-	for (size_t i = 0; i < indicesCount; i += 3)
-	{
-		unsigned int in0 = indices[i] * vLength;
-		unsigned int in1 = indices[i + 1] * vLength;
-		unsigned int in2 = indices[i + 2] * vLength;
-		glm::vec3 v1 = glm::vec3(vertices[in1] - vertices[in0],
-			vertices[in1 + 1] - vertices[in0 + 1],
-			vertices[in1 + 2] - vertices[in0 + 2]);
-		glm::vec3 v2 = glm::vec3(vertices[in2] - vertices[in0],
-			vertices[in2 + 1] - vertices[in0 + 1],
-			vertices[in2 + 2] - vertices[in0 + 2]);
-		glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
-		in0 += normalOffset; in1 += normalOffset; in2 += normalOffset;
-		vertices[in0] += normal.x; vertices[in0 + 1] += normal.y; vertices[in0 + 2] += normal.z;
-		vertices[in1] += normal.x; vertices[in1 + 1] += normal.y; vertices[in1 + 2] += normal.z;
-		vertices[in2] += normal.x; vertices[in2 + 1] += normal.y; vertices[in2 + 2] += normal.z;
-	}
-
-	for (size_t i = 0; i < verticesCount / vLength; i++)
-	{
-		unsigned nOffset = i * vLength + normalOffset;
-		glm::vec3 normal = glm::vec3(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
-		normal = glm::normalize(normal);
-		vertices[nOffset] = normal.x; vertices[nOffset + 1] = normal.y; vertices[nOffset + 2] = normal.z;
-	}
-}
-
 void CreateObjects()
 {
-	unsigned int indices[] = {
-		0, 3, 1,
-		1, 3, 2,
-		2, 3, 0,
-		0, 1, 2
-	};
-
-	GLfloat vertices[] = {
-		//	x	   y	  z		   u	   v	 n_x   n_y   n_z
-			-1.0f, -1.0f, 0.0f,   0.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
-			0.0f, -1.0f, 2.0f,    0.5f, 0.0f,	 0.0f, 0.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,    1.0f, 0.0f,	 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,     0.5f, 1.0f,	 0.0f, 0.0f, 0.0f
-	};
-
 	unsigned int floorIndices[] = {
 		0, 2, 1,
 		1, 2, 3
@@ -136,20 +92,50 @@ void CreateObjects()
 		20.0f, 0.0f, 20.0f,   -20.0f, -20.0f, 0.0f, -1.0f, 0.0f
 	};
 
-	ComputeAverageNormals(indices, 12, vertices, 32, 8, 5);
+	floorMesh->CreateMesh(floorVertices, floorIndices, 32, 6);
+}
 
-	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indices, 32, 12);
-	meshList.push_back(obj1);
+void AddLights()
+{
+	mainLight = DirectionalLight(glm::vec3(1.0f), 0.2f,
+							     0.5f, glm::vec3(-2.0f, -1.0f, -1.0f), 2048, 2048);
 
-	Mesh* obj2 = new Mesh();
-	obj2->CreateMesh(vertices, indices, 32, 12);
-	meshList.push_back(obj2);
+	pointLights[0] = PointLight(glm::vec3(1.0f, 0.0f, 0.0f),
+								0.8f, 0.8f,
+								glm::vec3(-2.0f, 0.0f, 0.0f),
+								LightAttenuationModel(1.0f, 0.1f, 1.0f),
+								1024, 1024, 0.01f, 100.0f);
+	pointLightCount++;
+	pointLights[1] = PointLight(glm::vec3(0.0f, 1.0f, 0.0f),
+								0.8f, 0.8f,
+								glm::vec3(1.0f, 0.0f, -2.0f),
+								LightAttenuationModel(1.0f, 0.1f, 1.0f),
+								1024, 1024, 0.01f, 100.0f);
+	pointLightCount++;
+	pointLights[2] = PointLight(glm::vec3(0.0f, 0.0f, 1.0f),
+								0.8f, 0.8f,
+								glm::vec3(0.0f, 0.0f, 1.0f),
+								LightAttenuationModel(1.0f, 0.1f, 1.0f),
+								1024, 1024, 0.01f, 100.0f);
+	pointLightCount++;
 
-	Mesh* floor = new Mesh();
-	floor->CreateMesh(floorVertices, floorIndices, 32, 6);
-	meshList.push_back(floor);
+	spotLights[0] = SpotLight(glm::vec3(1.0f),
+							  0.6f, 0.8f,
+							  glm::vec3(1.0f, 0.0f, 1.0f),
+							  glm::vec3(-1.0f, -1.0f, -1.0f),
+							  20.0f,
+							  LightAttenuationModel(1.0f, 0.1f, 1.0f),
+							  1024, 1024, 0.01f, 100.0f);
+	spotLightCount++;
 
+	spotLights[1] = SpotLight(glm::vec3(0.7f, 1.0f, 1.0f),
+							  0.2f, 0.8f,
+							  glm::vec3(0.0f, -0.6f, 0.5f),
+							  glm::vec3(1.0f, -1.0f, 0.0f),
+							  45.0f,
+							  LightAttenuationModel(0.1f, 0.1f, 0.02f),
+							  1024, 1024, 0.01f, 100.0f);
+	spotLightCount++;
 }
 
 void CreateShaders()
@@ -160,53 +146,53 @@ void CreateShaders()
 
 	directionalShadowShader = Shader();
 	directionalShadowShader.CreateFromFile("Shaders/directional_shadow_map.vert",
-		"Shaders/directional_shadow_map.frag");
+										   "Shaders/directional_shadow_map.frag");
+	
+	omniShadowShader = Shader();
+	omniShadowShader.CreateFromFile("Shaders/omni_shadow_map.vert",
+									"Shaders/omni_shadow_map.frag",
+									"Shaders/omni_shadow_map.geom");
+									
 }
 
 void RenderScene()
 {
 	glm::mat4 model(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 1.0f));
+	model = glm::translate(model, glm::vec3(0.0f, -1.5f, 0.5f));
 	model = glm::scale(model, glm::vec3(0.05f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 	utahTeapot.RenderModel();
-	
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(1.0f, 0.9f, -7.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	girafeTexture.UseTexture();
-	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-	meshList[0]->RenderMesh();
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-1.0f, -0.9f, -7.0f));
+	model = glm::scale(model, glm::vec3(0.005f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	leopardTexture.UseTexture();
-	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-	meshList[1]->RenderMesh();
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	utahTeapot.RenderModel();
 
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	placeholderTexture.UseTexture();
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-	meshList[2]->RenderMesh();
-
+	floorMesh->RenderMesh();
+	/*
 	model = glm::mat4(1.0f);
-	model = glm::scale(model, glm::vec3(0.001f));
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(0.0f));
+	model = glm::scale(model, glm::vec3(1.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	grayTexture.UseTexture();
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-	falconMillenium.RenderModel();
-
+	dragon.RenderModel();
+	*/
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(-1.0f, -1.9f, -1.0f));
-	model = glm::rotate(model, glm::radians(-150.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(0.1f));
+	model = glm::translate(model, glm::vec3(-0.3f, -2.1f, -1.0f));
+	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(5.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-	xWing.RenderModel();
+	grayTexture.UseTexture();
+	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	bunny.RenderModel();
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
@@ -219,8 +205,33 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	uniformModel = directionalShadowShader.GetModelLocation();
 	directionalShadowShader.SetDirectionalLightTransform(&light->CalculateLightTransform());
 
+	directionalShadowShader.Validate();
+
 	RenderScene();
 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void OmniShadowMapPass(PointLight* light)
+{
+	omniShadowShader.UseShader();
+	ShadowMap* shadowMap = light->GetShadowMap();
+	glViewport(0, 0, shadowMap->GetShadowWidth(), shadowMap->GetShadowHeight());
+	shadowMap->Write();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	uniformModel = omniShadowShader.GetModelLocation();
+	uniformOmniLightPos = omniShadowShader.GetPointLightPositionLocation();
+	uniformFarPlane = omniShadowShader.GetFarPlaneLocation();
+
+	glUniform3fv(uniformOmniLightPos, 1, glm::value_ptr(light->GetPosition()));
+	glUniform1f(uniformFarPlane, light->GetFarPlane());
+
+	omniShadowShader.SetLightMatrices(light->CalculateLightTransform());
+
+	omniShadowShader.Validate();
+
+	RenderScene();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -245,13 +256,15 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	glUniform3fv(uniformEyePosition, 1, glm::value_ptr(camera.GetPosition()));
 
 	shaderList[0].SetDirectionalLight(&mainLight);
-	shaderList[0].SetPointLights(pointLights, pointLightCount);
-	shaderList[0].SetSpotLights(spotLights, spotLightCount);
+	shaderList[0].SetPointLights(pointLights, pointLightCount, 3);
+	shaderList[0].SetSpotLights(spotLights, spotLightCount, 3 + pointLightCount, pointLightCount);
 	shaderList[0].SetDirectionalLightTransform(&mainLight.CalculateLightTransform());
 
-	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
-	shaderList[0].SetTexture(0);
-	shaderList[0].SetDirectionalShadowMap(1);
+	mainLight.GetShadowMap()->Read(GL_TEXTURE2);
+	shaderList[0].SetTexture(1);
+	shaderList[0].SetDirectionalShadowMap(2);
+
+	shaderList[0].Validate();
 
 	RenderScene();
 }
@@ -267,8 +280,9 @@ int main()
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.2f, &input);
 
-	falconMillenium.LoadModel("Models/millenium-falcon.obj");
-	xWing.LoadModel("Models/star wars x-wing.obj");
+	//falconMillenium.LoadModel("Models/millenium-falcon.obj");
+	//dragon.LoadModel("Models/dragon.obj");
+	bunny.LoadModel("Models/bunny.obj");
 	utahTeapot.LoadModel("Models/utah-teapot.obj");
 
 	girafeTexture = Texture((char*)"Textures/girafe.jpg");
@@ -277,32 +291,14 @@ int main()
 	leopardTexture.LoadTexture();
 	placeholderTexture = Texture((char*)"Textures/white_square.png");
 	placeholderTexture.LoadTexture();
+	grayTexture = Texture((char*)"Textures/gray.jpg");
+	grayTexture.LoadTexture();
 
 	shinyMaterial = Material(0.5f, 32);
 	dullMaterial = Material(0.3f, 1);
 
-	mainLight = DirectionalLight(glm::vec3(1.0f), 0.3f,
-								 0.2f, glm::vec3(-2.0f, -1.0f, -1.0f), 1024, 1024);
-
-	pointLights[0] = PointLight(glm::vec3(1.0f),
-								0.2f, 0.2f,
-								glm::vec3(-4.0f, 0.0f, -6.0f),
-								LightAttenuationModel(0.3f, 0.1f, 0.02f));
-	pointLightCount++;
-	pointLights[1] = PointLight(glm::vec3(1.0f, 0.6f, 1.0f),
-								0.2f, 0.2f,
-								glm::vec3(11.0f, 0.0f, 11.0f),
-								LightAttenuationModel(1.0f, 0.1f, 0.02f));
-	pointLightCount++;
-
-	spotLights[0] = SpotLight(glm::vec3(0.7f),
-							  0.2f, 0.3f,
-							  glm::vec3(1.0f, 0.0f, 1.0f),
-							  glm::vec3(-1.0f, -1.0f, -1.0f),
-							  20.0f,
-							  LightAttenuationModel(0.3f, 0.1f, 0.02f));
-	spotLightCount++;
-
+	AddLights();
+	
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f),
 											mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight(),
 											0.1f,
@@ -319,8 +315,19 @@ int main()
 		// Get user input events
 		glfwPollEvents();
 		camera.Update(deltatime);
+		spotLights[0].SetAt(3.0f * glm::vec3(sin(now), 0.0f, cos(now)), glm::vec3(-sin(now), -0.5f, -cos(now)));
 
 		DirectionalShadowMapPass(&mainLight);
+		
+		for (size_t i = 0; i < pointLightCount; i++)
+		{
+			OmniShadowMapPass(&pointLights[i]);
+		}
+		for (size_t i = 0; i < spotLightCount; i++)
+		{
+			OmniShadowMapPass(&spotLights[i]);
+		}
+		
 		RenderPass(projection, camera.GetViewMatrix());
 
 

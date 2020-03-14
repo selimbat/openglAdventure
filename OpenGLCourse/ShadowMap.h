@@ -13,8 +13,9 @@ public:
 	GLuint GetShadowHeight();
 	~ShadowMap();
 protected:
-	GLuint _FBO;
+	GLuint _FBOId;
 	GLuint _shadowMapTextureId;
 	GLuint _width, _height;
+	bool IsFrameBufferComplete();
 };
 
